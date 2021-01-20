@@ -1,9 +1,18 @@
 from sanic import Sanic
+from sanic_healthcheck import HealthCheck
 from sanic.response import json
 from tronapi import Tron
+import random
 
 app = Sanic("trc20")
+health_check = HealthCheck(app)
 
+
+# Define checks for the health check.
+def check_health_random():
+    if random.random() > 0.9:
+        return False, 'the random number is > 0.9'
+    return True, 'the random number is <= 0.9'
 
 def send_from_to(from_addr, to_addr, private_key, contract_addr, send_value, fee_limit):
     full_node = 'https://api.trongrid.io'
@@ -60,4 +69,5 @@ def post_json(request):
 
 
 if __name__ == "__main__":
+    health_check.add_check(check_health_random)
     app.run(host="0.0.0.0", port=8000)
